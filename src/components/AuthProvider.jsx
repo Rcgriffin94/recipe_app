@@ -4,7 +4,8 @@ import { supabase } from '../lib/supabase';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(undefined); // undefined = still loading
+  const [session, setSession] = useState(undefined);
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -16,8 +17,18 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (!session) { setRole(null); return; }
+    supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single()
+      .then(({ data }) => setRole(data?.role ?? null));
+  }, [session]);
+
   return (
-    <AuthContext.Provider value={{ session, loading: session === undefined }}>
+    <AuthContext.Provider value={{ session, role, loading: session === undefined }}>
       {children}
     </AuthContext.Provider>
   );

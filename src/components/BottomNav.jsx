@@ -1,21 +1,9 @@
 import { NavLink } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthProvider';
 
 export default function BottomNav() {
-  const { session } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    if (!session) return;
-    supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', session.user.id)
-      .single()
-      .then(({ data }) => setIsAdmin(data?.role === 'admin'));
-  }, [session]);
+  const { role } = useAuth();
 
   const linkClass = ({ isActive }) =>
     `flex flex-col items-center gap-0.5 text-xs font-medium transition-colors ${
@@ -30,22 +18,25 @@ export default function BottomNav() {
           <span>Home</span>
         </NavLink>
 
+        <NavLink to="/recipes" className={linkClass}>
+          <span className="text-xl">📖</span>
+          <span>Recipes</span>
+        </NavLink>
+
         <NavLink to="/favourites" className={linkClass}>
           <span className="text-xl">❤️</span>
           <span>Favourites</span>
         </NavLink>
 
-        {isAdmin && (
-          <NavLink to="/admin" className={linkClass}>
-            <span className="text-xl">⚙️</span>
-            <span>Admin</span>
+        {role === 'owner' && (
+          <NavLink to="/users" className={linkClass}>
+            <span className="text-xl">👥</span>
+            <span>Users</span>
           </NavLink>
         )}
 
         <button
-          onClick={async () => {
-            await supabase.auth.signOut();
-          }}
+          onClick={async () => { await supabase.auth.signOut(); }}
           className="flex flex-col items-center gap-0.5 text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors"
         >
           <span className="text-xl">👋</span>

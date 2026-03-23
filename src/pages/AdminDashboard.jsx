@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../components/AuthProvider';
 
-const EMPTY_INVITE = { email: '', status: '', error: '' };
+const CAN_EDIT = ['owner', 'editor'];
 
 const EMPTY_FORM = {
   title: '',
@@ -15,7 +15,7 @@ const EMPTY_FORM = {
 };
 
 export default function AdminDashboard() {
-  const { session } = useAuth();
+  const { session, role } = useAuth();
   const navigate = useNavigate();
 
   const [isAdmin, setIsAdmin] = useState(null); // null = loading
@@ -26,57 +26,17 @@ export default function AdminDashboard() {
   const [photoPreview, setPhotoPreview] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [invite, setInvite] = useState(EMPTY_INVITE);
-  const [invites, setInvites] = useState([]);
 
   // Check admin role
   useEffect(() => {
-    async function checkRole() {
-      const { data } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
-
-      if (data?.role === 'admin') {
-        setIsAdmin(true);
-        loadRecipes();
-        loadInvites();
-      } else {
-        setIsAdmin(false);
-      }
-    }
-    checkRole();
-  }, [session]);
-
-  async function loadInvites() {
-    const { data } = await supabase
-      .from('invites')
-      .select('*')
-      .order('invited_at', { ascending: false });
-    setInvites(data ?? []);
-  }
-
-  async function handleInvite(e) {
-    e.preventDefault();
-    setInvite((prev) => ({ ...prev, status: 'sending', error: '' }));
-
-    const { error } = await supabase
-      .from('invites')
-      .insert({ email: invite.email });
-
-    if (error) {
-      setInvite((prev) => ({ ...prev, status: '', error: error.message }));
+    if (role === null) return;
+    if (CAN_EDIT.includes(role)) {
+      setIsAdmin(true);
+      loadRecipes();
     } else {
-      setInvite(EMPTY_INVITE);
-      await loadInvites();
+      setIsAdmin(false);
     }
-  }
-
-  async function handleRemoveInvite(email) {
-    await supabase.from('invites').delete().eq('email', email);
-    await loadInvites();
-  }
+  }, [role]);
 
   async function loadRecipes() {
     const { data } = await supabase
@@ -311,45 +271,6 @@ export default function AdminDashboard() {
               )}
             </div>
           </form>
-        </div>
-
-        {/* Invite section */}
-        <div className="bg-white rounded-2xl shadow-sm p-6 mb-8">
-          <h2 className="text-lg font-bold text-green-800 mb-4">Invite a Member</h2>
-          <form onSubmit={handleInvite} className="flex gap-2 mb-4">
-            <input
-              type="email"
-              required
-              value={invite.email}
-              onChange={(e) => setInvite({ ...invite, email: e.target.value })}
-              placeholder="family@example.com"
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
-            />
-            <button
-              type="submit"
-              disabled={invite.status === 'sending'}
-              className="bg-green-700 hover:bg-green-800 text-white font-semibold px-4 py-2 rounded-lg transition disabled:opacity-50 text-sm"
-            >
-              {invite.status === 'sending' ? 'Inviting…' : 'Invite'}
-            </button>
-          </form>
-          {invite.error && <p className="text-red-600 text-sm mb-2">{invite.error}</p>}
-
-          {invites.length > 0 && (
-            <ul className="divide-y divide-gray-100">
-              {invites.map((inv) => (
-                <li key={inv.email} className="flex items-center justify-between py-2 text-sm">
-                  <span className="text-gray-700">{inv.email}</span>
-                  <button
-                    onClick={() => handleRemoveInvite(inv.email)}
-                    className="text-red-500 hover:underline text-xs"
-                  >
-                    Remove
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
 
         {/* Recipe list */}

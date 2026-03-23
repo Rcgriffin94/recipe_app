@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../components/AuthProvider';
 import RecipeCard from '../components/RecipeCard';
+import AppHeader from '../components/AppHeader';
 
 export default function Favourites() {
   const { session } = useAuth();
@@ -40,9 +41,7 @@ export default function Favourites() {
 
   return (
     <div className="min-h-screen bg-stone-50 pb-24">
-      <header className="bg-green-800 text-white px-4 py-5 sticky top-0 z-10 shadow">
-        <h1 className="text-xl font-bold text-center">My Favourites</h1>
-      </header>
+      <AppHeader title="My Favourites" />
 
       <div className="max-w-2xl mx-auto px-4 mt-4">
         {loading ? (

@@ -1,99 +1,46 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
-import { useAuth } from '../components/AuthProvider';
-import RecipeCard from '../components/RecipeCard';
+import AppHeader from '../components/AppHeader';
 
 export default function Home() {
-  const { session } = useAuth();
-  const [recipes, setRecipes] = useState([]);
-  const [favourites, setFavourites] = useState(new Set());
-  const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function load() {
-      const [{ data: recipeData }, { data: favData }] = await Promise.all([
-        supabase.from('recipes').select('*').order('created_at', { ascending: false }),
-        supabase.from('favorites').select('recipe_id').eq('user_id', session.user.id),
-      ]);
-
-      setRecipes(recipeData ?? []);
-      setFavourites(new Set((favData ?? []).map((f) => f.recipe_id)));
-      setLoading(false);
-    }
-    load();
-  }, [session]);
-
-  async function handleToggleFavourite(recipeId) {
-    const isFav = favourites.has(recipeId);
-
-    // Optimistic update
-    setFavourites((prev) => {
-      const next = new Set(prev);
-      isFav ? next.delete(recipeId) : next.add(recipeId);
-      return next;
-    });
-
-    if (isFav) {
-      await supabase
-        .from('favorites')
-        .delete()
-        .match({ user_id: session.user.id, recipe_id: recipeId });
-    } else {
-      await supabase
-        .from('favorites')
-        .insert({ user_id: session.user.id, recipe_id: recipeId });
-    }
-  }
-
-  const filtered = recipes.filter((r) => {
-    const q = search.toLowerCase();
-    return (
-      r.title.toLowerCase().includes(q) ||
-      r.ingredients.toLowerCase().includes(q)
-    );
-  });
-
   return (
     <div className="min-h-screen bg-stone-50 pb-24">
-      {/* Header */}
-      <header className="bg-green-800 text-white px-4 py-5 sticky top-0 z-10 shadow">
-        <h1 className="text-xl font-bold text-center">The Secret Ingredient</h1>
-      </header>
+      <AppHeader />
 
-      <div className="max-w-2xl mx-auto px-4 mt-4">
-        {/* Search bar */}
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by title or ingredient…"
-          className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600 mb-6"
-        />
-
-        {/* Recipe grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl shadow-sm h-64 animate-pulse" />
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
-          <p className="text-center text-gray-500 mt-12">
-            {search ? 'No recipes match your search.' : 'No recipes yet.'}
+      <div className="max-w-2xl mx-auto px-4 mt-8 space-y-8">
+        <div className="text-center">
+          <div className="text-6xl mb-4">👨‍👩‍👧‍👦</div>
+          <h2 className="text-2xl font-bold text-green-800 mb-2">Welcome to the family kitchen</h2>
+          <p className="text-gray-600">
+            A private collection of recipes passed down, shared, and loved — just for us.
           </p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {filtered.map((recipe) => (
-              <RecipeCard
-                key={recipe.id}
-                recipe={recipe}
-                isFavourite={favourites.has(recipe.id)}
-                onToggleFavourite={handleToggleFavourite}
-              />
-            ))}
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm p-6 space-y-5">
+          <h3 className="text-lg font-semibold text-green-800">How it works</h3>
+
+          <div className="flex gap-4">
+            <span className="text-2xl">🔍</span>
+            <div>
+              <p className="font-medium text-gray-800">Browse recipes</p>
+              <p className="text-sm text-gray-500">Head to the Recipes tab to explore the full collection. Search by name or ingredient to find exactly what you need.</p>
+            </div>
           </div>
-        )}
+
+          <div className="flex gap-4">
+            <span className="text-2xl">❤️</span>
+            <div>
+              <p className="font-medium text-gray-800">Save your favourites</p>
+              <p className="text-sm text-gray-500">Tap the heart on any recipe to save it. Find all your favourites in one place under the Favourites tab.</p>
+            </div>
+          </div>
+
+          <div className="flex gap-4">
+            <span className="text-2xl">🔒</span>
+            <div>
+              <p className="font-medium text-gray-800">Family only</p>
+              <p className="text-sm text-gray-500">This app is private. Only people who have been invited can access the recipes inside.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
