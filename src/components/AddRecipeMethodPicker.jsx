@@ -17,7 +17,6 @@ export default function AddRecipeMethodPicker({ onSelect, onClose }) {
       icon: '🌐',
       title: 'Import from website',
       description: 'Paste a URL and we\'ll pull the recipe automatically',
-      comingSoon: true,
     },
   ];
 

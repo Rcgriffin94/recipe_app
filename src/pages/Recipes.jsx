@@ -4,6 +4,7 @@ import { useAuth } from '../components/AuthProvider';
 import RecipeCard from '../components/RecipeCard';
 import RecipeFormModal from '../components/RecipeFormModal';
 import PhotoRecipeModal from '../components/PhotoRecipeModal';
+import UrlRecipeModal from '../components/UrlRecipeModal';
 import AddRecipeMethodPicker from '../components/AddRecipeMethodPicker';
 import AppHeader from '../components/AppHeader';
 
@@ -16,7 +17,8 @@ export default function Recipes() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [showPicker, setShowPicker] = useState(false);
-  const [addMethod, setAddMethod] = useState(null); // 'manual' | 'photo'
+  const [addMethod, setAddMethod] = useState(null); // 'manual' | 'photo' | 'url'
+  const [prefillData, setPrefillData] = useState(null);
 
   const canEdit = CAN_EDIT.includes(role);
 
@@ -60,6 +62,12 @@ export default function Recipes() {
   function handleClose() {
     setAddMethod(null);
     setShowPicker(false);
+    setPrefillData(null);
+  }
+
+  function handleUrlExtracted(data) {
+    setPrefillData(data);
+    setAddMethod('manual');
   }
 
   async function handleSave() {
@@ -125,11 +133,21 @@ export default function Recipes() {
       )}
 
       {addMethod === 'manual' && (
-        <RecipeFormModal recipe={null} onSave={handleSave} onClose={handleClose} onBack={handleBack} />
+        <RecipeFormModal
+          recipe={null}
+          initialData={prefillData}
+          onSave={handleSave}
+          onClose={handleClose}
+          onBack={prefillData ? undefined : handleBack}
+        />
       )}
 
       {addMethod === 'photo' && (
         <PhotoRecipeModal onSave={handleSave} onClose={handleClose} onBack={handleBack} />
+      )}
+
+      {addMethod === 'url' && (
+        <UrlRecipeModal onExtracted={handleUrlExtracted} onClose={handleClose} onBack={handleBack} />
       )}
     </div>
   );

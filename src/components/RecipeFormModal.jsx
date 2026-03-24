@@ -10,7 +10,7 @@ const EMPTY_FORM = {
   photo_url: '',
 };
 
-export default function RecipeFormModal({ recipe, onSave, onClose, onBack }) {
+export default function RecipeFormModal({ recipe, initialData, onSave, onClose, onBack }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState('');
@@ -28,8 +28,17 @@ export default function RecipeFormModal({ recipe, onSave, onClose, onBack }) {
         photo_url: recipe.photo_url ?? '',
       });
       setPhotoPreview(recipe.photo_url ?? '');
+    } else if (initialData) {
+      setForm({
+        title: initialData.title ?? '',
+        ingredients: initialData.ingredients ?? '',
+        steps: initialData.steps ?? '',
+        notes: initialData.notes ?? '',
+        tags: initialData.tags ?? '',
+        photo_url: '',
+      });
     }
-  }, [recipe]);
+  }, [recipe, initialData]);
 
   function handlePhotoChange(e) {
     const file = e.target.files[0];
