@@ -17,7 +17,7 @@ export default function UrlRecipeModal({ onExtracted, onClose, onBack }) {
       });
 
       if (fnError) throw new Error(fnError.message);
-      if (data.error) throw new Error(data.error);
+      if (data?.error) throw new Error(data.error);
 
       onExtracted(data);
     } catch (err) {

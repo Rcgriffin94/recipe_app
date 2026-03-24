@@ -28,6 +28,12 @@ Deno.serve(async (req) => {
 
     const html = await pageResponse.text();
 
+    // Extract og:image before stripping tags
+    const ogImageMatch =
+      html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i) ||
+      html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+    const imageUrl = ogImageMatch ? ogImageMatch[1] : '';
+
     // Strip scripts, styles, and HTML tags — keep readable text only
     const text = html
       .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
@@ -70,6 +76,7 @@ ${text}`,
     if (!jsonMatch) throw new Error("Could not extract recipe data from this page");
 
     const recipe = JSON.parse(jsonMatch[0]);
+    recipe.image_url = imageUrl;
 
     return new Response(JSON.stringify(recipe), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

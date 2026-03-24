@@ -35,8 +35,9 @@ export default function RecipeFormModal({ recipe, initialData, onSave, onClose, 
         steps: initialData.steps ?? '',
         notes: initialData.notes ?? '',
         tags: initialData.tags ?? '',
-        photo_url: '',
+        photo_url: initialData.image_url ?? '',
       });
+      if (initialData.image_url) setPhotoPreview(initialData.image_url);
     }
   }, [recipe, initialData]);
 
