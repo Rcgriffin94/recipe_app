@@ -10,7 +10,7 @@ const EMPTY_FORM = {
   photo_url: '',
 };
 
-export default function RecipeFormModal({ recipe, onSave, onClose }) {
+export default function RecipeFormModal({ recipe, onSave, onClose, onBack }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState('');
@@ -87,9 +87,16 @@ export default function RecipeFormModal({ recipe, onSave, onClose }) {
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto shadow-xl">
         <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-green-800">
-            {recipe ? 'Edit Recipe' : 'Add Recipe'}
-          </h2>
+          <div className="flex items-center gap-3">
+            {onBack && (
+              <button onClick={onBack} className="text-green-700 text-sm font-medium hover:underline">
+                ← Back
+              </button>
+            )}
+            <h2 className="text-lg font-bold text-green-800">
+              {recipe ? 'Edit Recipe' : 'Add Recipe'}
+            </h2>
+          </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
         </div>
 

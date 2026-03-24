@@ -3,6 +3,8 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../components/AuthProvider';
 import RecipeCard from '../components/RecipeCard';
 import RecipeFormModal from '../components/RecipeFormModal';
+import PhotoRecipeModal from '../components/PhotoRecipeModal';
+import AddRecipeMethodPicker from '../components/AddRecipeMethodPicker';
 import AppHeader from '../components/AppHeader';
 
 const CAN_EDIT = ['owner', 'editor'];
@@ -13,7 +15,8 @@ export default function Recipes() {
   const [favourites, setFavourites] = useState(new Set());
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const [addMethod, setAddMethod] = useState(null); // 'manual' | 'photo'
 
   const canEdit = CAN_EDIT.includes(role);
 
@@ -44,8 +47,23 @@ export default function Recipes() {
     }
   }
 
+  function handleMethodSelect(method) {
+    setShowPicker(false);
+    setAddMethod(method);
+  }
+
+  function handleBack() {
+    setAddMethod(null);
+    setShowPicker(true);
+  }
+
+  function handleClose() {
+    setAddMethod(null);
+    setShowPicker(false);
+  }
+
   async function handleSave() {
-    setShowModal(false);
+    setAddMethod(null);
     const { data } = await supabase.from('recipes').select('*').order('created_at', { ascending: false });
     setRecipes(data ?? []);
   }
@@ -70,7 +88,7 @@ export default function Recipes() {
           />
           {canEdit && (
             <button
-              onClick={() => setShowModal(true)}
+              onClick={() => setShowPicker(true)}
               className="bg-green-700 hover:bg-green-800 text-white font-semibold text-sm px-4 rounded-xl transition whitespace-nowrap"
             >
               + Add Recipe
@@ -102,12 +120,16 @@ export default function Recipes() {
         )}
       </div>
 
-      {showModal && (
-        <RecipeFormModal
-          recipe={null}
-          onSave={handleSave}
-          onClose={() => setShowModal(false)}
-        />
+      {showPicker && (
+        <AddRecipeMethodPicker onSelect={handleMethodSelect} onClose={handleClose} />
+      )}
+
+      {addMethod === 'manual' && (
+        <RecipeFormModal recipe={null} onSave={handleSave} onClose={handleClose} onBack={handleBack} />
+      )}
+
+      {addMethod === 'photo' && (
+        <PhotoRecipeModal onSave={handleSave} onClose={handleClose} onBack={handleBack} />
       )}
     </div>
   );

@@ -123,46 +123,71 @@ export default function RecipeDetail() {
         )}
 
         {/* Ingredients */}
-        <section className="mb-8">
-          <h2 className="text-xl font-bold text-green-800 mb-3">Ingredients</h2>
-          <ul className="space-y-2">
-            {ingredients.map((item, i) => (
-              <li
-                key={i}
-                onClick={() => toggleIngredient(i)}
-                className="flex items-center gap-3 cursor-pointer select-none"
-              >
-                <span
-                  className={`w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
-                    checked[i] ? 'bg-green-600 border-green-600 text-white' : 'border-gray-300'
-                  }`}
+        {ingredients.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-xl font-bold text-green-800 mb-3">Ingredients</h2>
+            <ul className="space-y-2">
+              {ingredients.map((item, i) => (
+                <li
+                  key={i}
+                  onClick={() => toggleIngredient(i)}
+                  className="flex items-center gap-3 cursor-pointer select-none"
                 >
-                  {checked[i] && (
-                    <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none">
-                      <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  )}
-                </span>
-                <span className={checked[i] ? 'line-through text-gray-400' : 'text-gray-700'}>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
+                  <span
+                    className={`w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
+                      checked[i] ? 'bg-green-600 border-green-600 text-white' : 'border-gray-300'
+                    }`}
+                  >
+                    {checked[i] && (
+                      <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none">
+                        <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                  </span>
+                  <span className={checked[i] ? 'line-through text-gray-400' : 'text-gray-700'}>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* Steps */}
-        <section className="mb-8">
-          <h2 className="text-xl font-bold text-green-800 mb-3">Instructions</h2>
-          <ol className="space-y-4">
-            {steps.map((step, i) => (
-              <li key={i} className="flex gap-4">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-green-700 text-white text-sm font-bold flex items-center justify-center">
-                  {i + 1}
-                </span>
-                <p className="text-gray-700 leading-relaxed pt-0.5">{step}</p>
-              </li>
+        {steps.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-xl font-bold text-green-800 mb-3">Instructions</h2>
+            <ol className="space-y-4">
+              {steps.map((step, i) => (
+                <li key={i} className="flex gap-4">
+                  <span className="flex-shrink-0 w-7 h-7 rounded-full bg-green-700 text-white text-sm font-bold flex items-center justify-center">
+                    {i + 1}
+                  </span>
+                  <p className="text-gray-700 leading-relaxed pt-0.5">{step}</p>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+
+        {/* Photo-only recipe — show all photos */}
+        {ingredients.length === 0 && steps.length === 0 && (
+          <div className="mb-8 space-y-4">
+            {(recipe.content_photo_urls?.length > 0
+              ? recipe.content_photo_urls
+              : recipe.content_photo_url
+              ? [recipe.content_photo_url]
+              : recipe.photo_url
+              ? [recipe.photo_url]
+              : []
+            ).map((url, i) => (
+              <img
+                key={i}
+                src={url}
+                alt={`${recipe.title} — page ${i + 1}`}
+                className="w-full rounded-xl shadow-sm"
+              />
             ))}
-          </ol>
-        </section>
+          </div>
+        )}
 
         {/* Notes */}
         {recipe.notes && (
